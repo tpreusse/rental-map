@@ -1,0 +1,17 @@
+{
+  "name": "find-a-flat",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "tpreusse",
+  "license": "MIT",
+  "dependencies": {
+    "request": "^2.34.0",
+    "q": "^1.0.1",
+    "grunt": "^0.4.4",
+    "lodash": "^2.4.1"
+  }
+}
