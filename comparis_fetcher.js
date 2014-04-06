@@ -1,6 +1,7 @@
 var fs = require('fs');
 var request = require('request');
 var Q = require('q');
+var _ = require('lodash');
 
 var requestQueue = Q(0);
 
@@ -87,8 +88,8 @@ function fetchClusters() {
 
                 console.log('clusters', clusters.length);
                 console.log('ads', ads.length);
-                fs.writeFile('clusters.json', JSON.stringify(clusters, null, 4), 'utf8');
-                fs.writeFile('ads.json', JSON.stringify(ads, null, 4), 'utf8');
+                fs.writeFileSync('clusters.json', JSON.stringify(clusters, null, 4), 'utf8');
+                fs.writeFileSync('ads.json', JSON.stringify(ads, null, 4), 'utf8');
             });
         })
     ).then(function(promises) {
@@ -119,7 +120,7 @@ function fetchDetails(ids) {
             }
         });
         console.log('details', details.length);
-        fs.writeFile('details.json', JSON.stringify(details, null, 4), 'utf8');
+        fs.writeFileSync('details.json', JSON.stringify(details, null, 4), 'utf8');
     });
 }
 
@@ -144,5 +145,49 @@ function fetchPendingDetails() {
     return Q.allSettled(fetchers);
 }
 
+function generateGeoJson() {
+    var features = [];
+
+    details.filter(function(d) { return d.AdType == 'Actual'; }).forEach(function(d) {
+        var m = _.find(ads, function(a) { return d.AdId == a.AdId; });
+
+        var rental_type = d.HistoryGroup.split(','),
+            street = (d.Street + " " + (d.StreetNumber ? d.StreetNumber : '')).replace(/^\s+|\s+$/g, '');
+
+        features.push({
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [m.GeoPosLat, m.GeoPosLng]
+            },
+            "properties": {
+                "source_id": d.AdId,
+                "source": "comparis",
+                "rental_type": rental_type[0],
+                "href": d.DetailUrl,
+                "image": "https://www.comparis.ch" + String(d.ImageUrl).replace(/&(w|h|rm)=\d+/g, ''),
+                "price": d.Price,
+                "space": d.LivingSpace,
+                "rooms": d.Rooms,
+                "zip": d.Zip,
+                "city": d.City,
+                "street": street,
+                "floor": d.floor,
+                "create_date": new Date(d.CreateDate.replace('/Date(', '').replace(')/', '')).toJSON()
+            }
+        });
+    });
+    console.log('features', features.length);
+
+    fs.writeFileSync('geojson.json', JSON.stringify({
+        "type": "FeatureCollection",
+        "features": features
+    }, null, 4), 'utf8');
+}
+
+// maybe crawl detail page
+// https://github.com/MatthewMueller/cheerio
+
 exports.fetchClusters = fetchClusters;
 exports.fetchDetails = fetchPendingDetails;
+exports.generateGeoJson = generateGeoJson;

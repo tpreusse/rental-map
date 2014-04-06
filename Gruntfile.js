@@ -18,5 +18,8 @@ module.exports = function(grunt) {
             done();
         });
     });
+    grunt.registerTask('comparis:geo_json', 'Generates geo json from ads and details', function() {
+        comparis.generateGeoJson();
+    });
 
 };
