@@ -1,0 +1,82 @@
+$icon-font-path: "/bower_components/sass-bootstrap/fonts/";
+
+@import 'sass-bootstrap/lib/bootstrap';
+
+// angular ui
+.nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
+
+.sidebar {
+    h2 {
+        margin-top: 0;
+    }
+
+    label.filter-checkbox {
+        display: block;
+        .color {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+    }
+}
+
+.objects {
+    display:flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-content: flex-start;
+    align-items: stretch;
+
+    .object {
+        margin: 15px;
+        flex-grow: 1;
+        flex-shrink: 1;
+        flex-basis: 200px;
+
+        .caption {
+            height: 100%;
+        }
+
+        h3 {
+            font-size: 1.3em;
+            margin: 0 0 10px;
+        }
+
+        img {
+            height: 130px;
+        }
+    }
+}
+
+.map {
+    height: 500px;
+    margin-bottom: 15px;
+
+
+    .marker-cluster div {
+        width: 30px;
+        height: 30px;
+
+        border-radius: 50%;
+        border: 2px solid rgba(0, 0, 0, 0.5);
+        background-color: rgba(0, 0, 0, 0.2);
+    }
+
+    .leaflet-clickable:hover {
+        cursor: pointer;
+    }
+
+    .marker-cluster.leaflet-clickable:hover div {
+        border-color: rgba(0, 0, 0, 1);
+    }
+
+    path.leaflet-clickable:hover {
+        stroke-opacity: 1;
+    }
+
+    .marker-cluster div:hover {
+
+    }
+}

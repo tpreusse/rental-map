@@ -152,20 +152,25 @@ function generateGeoJson() {
         var m = _.find(ads, function(a) { return d.AdId == a.AdId; });
 
         var rental_type = d.HistoryGroup.split(','),
-            street = (d.Street + " " + (d.StreetNumber ? d.StreetNumber : '')).replace(/^\s+|\s+$/g, '');
+            street = (d.Street + " " + (d.StreetNumber ? d.StreetNumber : '')).replace(/^\s+|\s+$/g, ''),
+            image = d.ImageUrl;
+
+        if(image) {
+            image = "https://www.comparis.ch" + String(d.ImageUrl).replace(/&(w|h|rm)=\d+/g, '');
+        }
 
         features.push({
             "type": "Feature",
             "geometry": {
                 "type": "Point",
-                "coordinates": [m.GeoPosLat, m.GeoPosLng]
+                "coordinates": [m.GeoPosLng,m.GeoPosLat]
             },
             "properties": {
                 "source_id": d.AdId,
                 "source": "comparis",
                 "rental_type": rental_type[0],
                 "href": d.DetailUrl,
-                "image": "https://www.comparis.ch" + String(d.ImageUrl).replace(/&(w|h|rm)=\d+/g, ''),
+                "image": image,
                 "price": d.Price,
                 "space": d.LivingSpace,
                 "rooms": d.Rooms,
@@ -179,7 +184,7 @@ function generateGeoJson() {
     });
     console.log('features', features.length);
 
-    fs.writeFileSync('geojson.json', JSON.stringify({
+    fs.writeFileSync('app/geojson.json', JSON.stringify({
         "type": "FeatureCollection",
         "features": features
     }, null, 4), 'utf8');
