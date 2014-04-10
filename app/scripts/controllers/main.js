@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('flatApp')
-.controller('MainCtrl', function($scope, $http, $filter, $location) {
+.controller('MainCtrl', function($scope, $http, $filter, $location, $window) {
   var makeFilterItems = $filter('makeFilterItems');
   var initialSearchQuery = angular.copy($location.search());
 
@@ -27,6 +27,16 @@ angular.module('flatApp')
       });
     }
     objects = $filter('filter')(objects, $scope.filterByRentalType);
+    objects = $filter('filter')(objects, function(item) {
+      var pass = true;
+      if(item.price < ($scope.priceMin || 0) && item.price !== 0) {
+        pass = false;
+      }
+      if($scope.priceMax && item.price > $scope.priceMax) {
+        pass = false;
+      }
+      return pass;
+    });
     objects = $filter('orderBy')(objects, 'price');
     $scope.filteredObjects = objects;
   }
@@ -59,6 +69,7 @@ angular.module('flatApp')
   $scope.$watchCollection('filteredObjects', function(value, old) {
     if(value !== old) {
       paginateObjects();
+      generatePriceData('Viewport', $scope.filteredObjects);
     }
   });
   $scope.$watch('currentPage + numPerPage', function() {
@@ -66,7 +77,11 @@ angular.module('flatApp')
     paginateObjects();
   });
 
-  $scope.$watchCollection('objects', filterObjects);
+  $scope.$watchCollection('objects', function() {
+    if(!$scope.objects) { return; }
+    // generatePriceData('All', $scope.objects);
+    filterObjects();
+  });
   $scope.$watchCollection('filter.check', function() {
     if(!$scope.filter) { return; }
     var checked = [];
@@ -89,7 +104,80 @@ angular.module('flatApp')
     filterObjects();
   });
 
+  $scope.priceMin = initialSearchQuery.min;
+  $scope.priceMax = initialSearchQuery.max;
+  $scope.$watch('priceMin + priceMax', function(value, old) {
+    if(value === old) { return; }
+
+    $location
+      .search('min', $scope.priceMin)
+      .search('max', $scope.priceMax)
+      .replace();
+
+    filterObjects();
+  });
+
   window.$d = $scope;
 
   $scope.typeScale = d3.scale.category20();
+
+
+  var colorForKey = {
+    'All': '#ccc',
+    'Viewport': '#428bca'
+  };
+
+  function generatePriceData(key, objects) {
+    var counters = {};
+    objects.forEach(function(objects) {
+      if(!objects.price) { return; }
+      counters[objects.price] = (counters[objects.price] || 0) + 1;
+    });
+    var values = [{x: 0, y: 0, size: 0}];
+    angular.forEach(counters, function(count, price) {
+      values.push({x: parseInt(price, 10), y: count, size: count});
+    });
+    var data = $scope.exampleData.filter(function(d) { return d.key === key; });
+    if(data.length) {
+      data[0].values = values;
+    }
+    else {
+      $scope.exampleData.push({
+        key: key,
+        color: colorForKey[key],
+        values: values
+      });
+    }
+    angular.element($window).trigger('resize');
+  }
+  $scope.xFunction = function(){
+    return function(d){
+      return Math.sqrt(d.x);
+    };
+  };
+  $scope.xAxisTickFormatFunction = function() {
+    return function(d) {
+      return Math.round(d * d);
+    };
+  };
+  $scope.yFunction = function(){
+    return function(d){
+      return Math.sqrt(d.y);
+    };
+  };
+  $scope.yAxisTickFormatFunction = function() {
+    return function(d) {
+      return Math.round(d * d);
+    };
+  };
+
+  $scope.exampleData = [];
+
+  // $scope.xAxisTickFormatFunction = function(){
+  //   return function(d){
+  //     return d3.time.format('%x')(new Date(d));  //uncomment for date format
+  //   };
+  // };
+
+
 });

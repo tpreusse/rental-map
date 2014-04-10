@@ -35,11 +35,30 @@
   <div class="col-md-3 sidebar">
     <h2 ng-show="filteredObjects !== undefined">{{ filteredObjects.length }} Objects<h2>
     <h3>Filters</h2>
+    <h4>Price</h4>
+
+    <nvd3-scatter-chart
+            data="exampleData"
+            id="priceChart"
+            height="250"
+            x="xFunction()"
+            y="yFunction()"
+            xAxisTickFormat="xAxisTickFormatFunction()"
+            yAxisTickFormat="yAxisTickFormatFunction()"
+            showLegend="true">
+          <svg></svg>
+    </nvd3-scatter-chart>
+    <label>
+      Min: <input size="6" type="text" ng-model="priceMin" />
+    </label>
+    <label>
+      Max: <input size="6" type="text" ng-model="priceMax" />
+    </label>
     <h4>Rental Type</h4>
     <label ng-repeat="item in filter.list" class="filter-checkbox">
       <input type="checkbox" ng-model="filter.check[item.name]">
       <span class="color" ng-style="{backgroundColor:typeScale(item.name)}"></span>
       {{ item.name }} ({{ item.count }})
-    </div>
+    </label>
   </div>
 </div>

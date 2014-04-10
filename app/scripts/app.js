@@ -6,7 +6,8 @@ angular.module('flatApp', [
   'ngResource',
   'ngSanitize',
   'ngRoute',
-  'ui.bootstrap'
+  'ui.bootstrap',
+  'nvd3ChartDirectives'
 ])
   .config(function ($routeProvider) {
     $routeProvider
