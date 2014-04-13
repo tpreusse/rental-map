@@ -11,7 +11,7 @@ function get(options) {
         var requestDeferred = Q.defer();
         console.log('get', options.url, options);
         request.get(options, function(error, response, data) {
-            if(!error && response.statusCode == 200) {
+            if(!error && response.statusCode === 200) {
                 deferred.resolve(data);
             }
             else {
@@ -36,8 +36,10 @@ function fetchClusters() {
     var clustersDeferred = Q.defer();
 
     var pendingClusters = function() {
+            var twentyFourAgo = new Date();
+            twentyFourAgo.setHours(twentyFourAgo.getHours() - 24);
             return clusters.filter(function(c) {
-                return !c.LastFetched;
+                return !c.LastFetched || (new Date(c.LastFetched)) < twentyFourAgo;
             });
         },
         pending = pendingClusters();
@@ -59,10 +61,10 @@ function fetchClusters() {
             }).then(function(data) {
                 (data.Clusters || []).forEach(function(aCluster) {
                     var exists = clusters.filter(function(c) {
-                        return c.LowerLeftLat == aCluster.LowerLeftLat &&
-                            c.LowerLeftLng == aCluster.LowerLeftLng &&
-                            c.UpperRightLat == aCluster.UpperRightLat &&
-                            c.UpperRightLng == aCluster.UpperRightLng;
+                        return c.LowerLeftLat === aCluster.LowerLeftLat &&
+                            c.LowerLeftLng === aCluster.LowerLeftLng &&
+                            c.UpperRightLat === aCluster.UpperRightLat &&
+                            c.UpperRightLng === aCluster.UpperRightLng;
                     });
                     if(!exists.length) {
                         clusters.push(aCluster);
@@ -71,7 +73,7 @@ function fetchClusters() {
                 (data.Marker || []).forEach(function(aMarker) {
                     aMarker.AdIds.forEach(function(AdId) {
                         var exists = ads.filter(function(a) {
-                            return a.AdId == AdId;
+                            return a.AdId === AdId;
                         });
                         if(!exists.length) {
                             ads.push({
@@ -92,7 +94,7 @@ function fetchClusters() {
                 fs.writeFileSync('ads.json', JSON.stringify(ads, null, 4), 'utf8');
             });
         })
-    ).then(function(promises) {
+    ).then(function() {
         if(pendingClusters().length) {
             fetchClusters().then(function(){
                 clustersDeferred.resolve();
@@ -111,11 +113,14 @@ function fetchDetails(ids) {
     });
     return get({url: "https://www.comparis.ch/immobilien/Handlers/Geo_v1?rk=15&type=detail&is_mashup=false&adids=" + ids.join(',') + "&dealtype=rent", json: true}).then(function(data) {
         (data.Detail || []).forEach(function(detail) {
-            var exists = details.filter(function(d) {
-                return d.AdId == detail.AdId;
+            detail.LastFetched = new Date().toJSON();
+            var index = _.findIndex(details, function(d) {
+                return d.AdId === detail.AdId;
             });
-            if(!exists.length) {
-                detail.LastFetched = new Date().toJSON();
+            if(index !== -1) {
+                details[index] = detail;
+            }
+            else {
                 details.push(detail);
             }
         });
@@ -126,9 +131,14 @@ function fetchDetails(ids) {
 
 function fetchPendingDetails() {
     console.log('details', details.length);
+
+    var twentyFourAgo = new Date();
+    twentyFourAgo.setHours(twentyFourAgo.getHours() - 24);
+
     var fetchedDetails = details.map(function(d) {
-        // imp: check detail.LastFetched for age
-        return d.AdId;
+        if((new Date(d.LastFetched)) > twentyFourAgo || d.AdType === 'Historic') {
+            return d.AdId;
+        }
     });
 
     var pendingDetails = ads.filter(function(ad) {
@@ -140,7 +150,7 @@ function fetchPendingDetails() {
 
     var fetchers = [];
     while(pendingDetails.length) {
-        fetchers.push(fetchDetails(pendingDetails.splice(0, 10)));
+        fetchers.push(fetchDetails(pendingDetails.splice(0, 20)));
     }
     return Q.allSettled(fetchers);
 }
@@ -148,8 +158,8 @@ function fetchPendingDetails() {
 function generateGeoJson() {
     var features = [];
 
-    details.filter(function(d) { return d.AdType == 'Actual'; }).forEach(function(d) {
-        var m = _.find(ads, function(a) { return d.AdId == a.AdId; });
+    details.filter(function(d) { return d.AdType === 'Actual'; }).forEach(function(d) {
+        var m = _.find(ads, function(a) { return d.AdId === a.AdId; });
 
         var rental_type = d.HistoryGroup.split(','),
             street = (d.Street + " " + (d.StreetNumber ? d.StreetNumber : '')).replace(/^\s+|\s+$/g, ''),
