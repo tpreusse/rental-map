@@ -150,7 +150,7 @@ function fetchPendingDetails() {
 
     var fetchers = [];
     while(pendingDetails.length) {
-        fetchers.push(fetchDetails(pendingDetails.splice(0, 20)));
+        fetchers.push(fetchDetails(pendingDetails.splice(0, 30)));
     }
     return Q.allSettled(fetchers);
 }
