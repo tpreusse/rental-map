@@ -60,23 +60,18 @@ $icon-font-path: "/bower_components/sass-bootstrap/fonts/";
         height: 30px;
 
         border-radius: 50%;
-        border: 2px solid rgba(0, 0, 0, 0.5);
-        background-color: rgba(0, 0, 0, 0.2);
+        opacity: 0.7;
+
+        &:hover {
+            opacity: 0.9;
+        }
     }
 
     .leaflet-clickable:hover {
         cursor: pointer;
     }
 
-    .marker-cluster.leaflet-clickable:hover div {
-        border-color: rgba(0, 0, 0, 1);
-    }
-
     path.leaflet-clickable:hover {
-        stroke-opacity: 1;
-    }
-
-    .marker-cluster div:hover {
-
+        fill-opacity: 0.9;
     }
 }

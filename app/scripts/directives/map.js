@@ -51,15 +51,34 @@ angular.module('flatApp').directive('map', function($timeout, debounce) {
       // map.setMaxBounds();
 
       // clusters
-      var radius = 4,
+      var radius = 6,
         markers = new L.MarkerClusterGroup({
         spiderfyOnMaxZoom: true,
-        maxClusterRadius: 1,
+        maxClusterRadius: radius * 3,
         iconCreateFunction: function(cluster) {
-          var area = (Math.PI * (radius * radius)) * cluster.getChildCount(),
+          var childCount = cluster.getChildCount(),
+            area = (Math.PI * (radius * radius)) * childCount,
             size = Math.sqrt(area / Math.PI) * 2;
 
-          return new L.DivIcon({ html: '<div style="width:'+size+'px;height:'+size+'px;"></div>', className: 'marker-cluster', iconSize: new L.Point(size, size) });
+          var colors = {};
+          cluster.getAllChildMarkers().sort(function(a, b) {
+            // keep color order consistent between redraws
+            return a.options.color > b.options.color;
+          }).forEach(function(m) {
+            var color = m.options.color;
+            colors[color] = (colors[color] || 0) + 1;
+          });
+
+          var gradient = ['to bottom'], start = 0;
+          angular.forEach(colors, function(count, color) {
+            var percent = Math.round(count / childCount * 100);
+            gradient.push(color+' '+start+'%');
+            start += percent;
+            gradient.push(color+' '+start+'%');
+          });
+
+          gradient = 'linear-gradient(' + gradient.join(', ') + ')';
+          return new L.DivIcon({ html: '<div style="width:'+size+'px;height:'+size+'px; background-image:'+gradient+';""></div>', className: 'marker-cluster', iconSize: new L.Point(size, size) });
         }
       });
 
@@ -67,6 +86,8 @@ angular.module('flatApp').directive('map', function($timeout, debounce) {
         var title = o.street;
         var marker = L.circleMarker(new L.LatLng(o.lat, o.lng), {
           radius: radius,
+          stroke: false,
+          fillOpacity: 0.7,
           color: $scope.typeScale(o.rental_type)
         });
         marker.bindPopup(title);

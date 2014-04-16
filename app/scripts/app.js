@@ -19,4 +19,5 @@ angular.module('flatApp', [
       .otherwise({
         redirectTo: '/'
       });
-  });
+  })
+  .value('localStorage', localStorage);

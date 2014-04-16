@@ -1,0 +1,36 @@
+<img ng-src="{{ object.image }}" ng-if="object.image">
+<div class="caption">
+  <p>
+    <span ng-style="{color:typeScale(object.rental_type)}">{{ object.rental_type }}</span>
+  </p>
+  <h3>{{ object.street }}</h3>
+  <p>
+    {{ object.zip }} {{ object.city }}<br />
+    <span ng-show="object.rooms">{{ object.rooms }} rooms<br /></span>
+    <span ng-show="object.space">{{ object.space }} m²<br /></span>
+    <span ng-switch="object.price">
+      <span ng-switch-when="0"><strong>price on request</strong></span>
+      <span ng-switch-default>
+        <strong>CHF {{ object.price }}.-</strong>
+        <small ng-show="object.rooms || object.space">
+          (
+          <span ng-show="object.rooms">{{ object.price / object.rooms | number:0 }} CHF/r</span>
+          <span ng-show="object.space">
+            <span ng-show="object.rooms"> - </span>
+            {{ object.price / object.space | number:0 }} CHF/m²
+          </span>
+          )
+        </small>
+      </span>
+    </span>
+  </p>
+  <div class="clearfix">
+    <a class="btn btn-default" role="button" ng-class="{'btn-success':object.selection == 2}" ng-click="select(object, 2)">✓</a>
+    <a class="btn btn-default" role="button" ng-class="{'btn-warning':object.selection == 1}"  ng-click="select(object, 1)">~</a>
+    <a class="btn btn-default" role="button" ng-class="{'btn-danger':object.selection == 0}"  ng-click="select(object, 0)">✕</a>
+    <div class="pull-right">
+      <a ng-if="object.selection !== undefined &amp;&amp; !object.found" class="btn btn-danger" role="button" ng-click="release(object)">Release</a>
+      <a ng-href="{{ object.href }}" class="btn btn-default" role="button" target="_blank">Details</a>
+    </div>
+  </div>
+</div>

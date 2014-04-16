@@ -6,54 +6,80 @@
 <div class="row">
   <div class="col-md-9">
     <div class="map" map="tpreusse.hng3chlk" map-options="{{ mapState }}"></div>
-    <pagination total-items="filteredObjects.length" page="currentPage" items-per-page="numPerPage"></pagination>
+    <pagination total-items="filteredObjects.length" max-size="10" rotate="false" page="currentPage" items-per-page="numPerPage"></pagination>
     <div class="row objects">
-      <div ng-repeat="object in pagedFilteredObjects" class="object thumbnail">
-        <img ng-src="{{ object.image }}" ng-if="object.image">
-        <div class="caption">
-          <p>
-            <span ng-style="{color:typeScale(object.rental_type)}">{{ object.rental_type }}</span>
-          </p>
-          <h3>{{ object.street }}</h3>
-          <p>
-            {{ object.zip }} {{ object.city }}<br />
-            <span ng-show="object.rooms">{{ object.rooms }} rooms<br /></span>
-            <span ng-show="object.space">{{ object.space }} m²<br /></span>
-            <span ng-switch="object.price">
-              <span ng-switch-when="0"><strong>price on request</strong></span>
-              <span ng-switch-default><strong>CHF {{ object.price }}.-</strong></span>
-            </span>
-          </p>
-          <div class="clearfix">
-            <a href="{{ object.href }}" class="btn btn-default pull-right" role="button" target="_blank">Details</a>
-          </div>
-        </div>
-      </div>
+      <flat ng-repeat="object in pagedFilteredObjects" class="object thumbnail">
+      </flat>
     </div>
-    <pagination total-items="filteredObjects.length" page="currentPage" items-per-page="numPerPage"></pagination>
+    <pagination total-items="filteredObjects.length" max-size="10" rotate="false" page="currentPage" items-per-page="numPerPage"></pagination>
+
+    <accordion close-others="false">
+      <accordion-group heading="✓ Selection" is-open="true">
+        <div class="row objects">
+          <flat ng-repeat="object in selection | filter: {selection:2,found:true}" class="object thumbnail"></flat>
+        </div>
+      </accordion-group>
+      <accordion-group heading="~ Maybe" is-open="true">
+        <div class="row objects">
+          <flat ng-repeat="object in selection | filter: {selection:1,found:true}" class="object thumbnail"></flat>
+        </div>
+      </accordion-group>
+      <accordion-group heading="✕ Nope">
+        <div class="row objects">
+          <flat ng-repeat="object in selection | filter: {selection:0,found:true}" class="object thumbnail"></flat>
+        </div>
+      </accordion-group>
+      <accordion-group heading="Gone" is-open="true">
+        <div class="row objects">
+          <flat ng-repeat="object in selection | filter: {found:false}" class="object thumbnail"></flat>
+        </div>
+      </accordion-group>
+    </accordion>
+    <br><br>
   </div>
   <div class="col-md-3 sidebar">
     <h2 ng-show="filteredObjects !== undefined">{{ filteredObjects.length }} Objects<h2>
     <h3>Filters</h2>
     <h4>Price</h4>
 
-    <nvd3-scatter-chart
-            data="exampleData"
-            id="priceChart"
-            height="250"
-            x="xFunction()"
-            y="yFunction()"
-            xAxisTickFormat="xAxisTickFormatFunction()"
-            yAxisTickFormat="yAxisTickFormatFunction()"
-            showLegend="true">
-          <svg></svg>
-    </nvd3-scatter-chart>
+    <div class="nvd3-container">
+      <nvd3-scatter-chart
+              data="priceData"
+              id="priceChart"
+              height="250"
+              interactive="false"
+              tooltips="true"
+              x="xFunction()"
+              y="yFunction()"
+              xAxisTickFormat="xAxisTickFormatFunction()"
+              yAxisTickFormat="yAxisTickFormatFunction()">
+      </nvd3-scatter-chart>
+    </div>
     <label>
       Min: <input size="6" type="text" ng-model="priceMin" />
     </label>
     <label>
       Max: <input size="6" type="text" ng-model="priceMax" />
     </label>
+
+    <h4>Rooms</h4>
+    <div class="nvd3-container">
+      <nvd3-stacked-area-chart
+        data="roomData"
+          id="roomChart"
+          showXAxis="true"
+          showYAxis="true"
+          yAxisTickFormat="roomYAxisTickFormatFunction()"
+          useInteractiveGuideline="true"
+          tooltips="true"
+          height="250"
+          style="stream">
+      </nvd3-stacked-area-chart>
+    </div>
+    <label>
+      Min: <input size="6" type="text" ng-model="roomMin" />
+    </label>
+
     <h4>Rental Type</h4>
     <label ng-repeat="item in filter.list" class="filter-checkbox">
       <input type="checkbox" ng-model="filter.check[item.name]">
