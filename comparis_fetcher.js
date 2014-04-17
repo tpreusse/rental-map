@@ -32,14 +32,15 @@ var rk = 1,
     ads = require('./ads.json'),
     details = require('./details.json');
 
+var refetchAge = new Date();
+    refetchAge.setHours(refetchAge.getHours() - 6);
+
 function fetchClusters() {
     var clustersDeferred = Q.defer();
 
     var pendingClusters = function() {
-            var twentyFourAgo = new Date();
-            twentyFourAgo.setHours(twentyFourAgo.getHours() - 24);
             return clusters.filter(function(c) {
-                return !c.LastFetched || (new Date(c.LastFetched)) < twentyFourAgo;
+                return !c.LastFetched || (new Date(c.LastFetched)) < refetchAge;
             });
         },
         pending = pendingClusters();
@@ -132,11 +133,8 @@ function fetchDetails(ids) {
 function fetchPendingDetails() {
     console.log('details', details.length);
 
-    var twentyFourAgo = new Date();
-    twentyFourAgo.setHours(twentyFourAgo.getHours() - 24);
-
     var fetchedDetails = details.map(function(d) {
-        if((new Date(d.LastFetched)) > twentyFourAgo || d.AdType === 'Historic') {
+        if((new Date(d.LastFetched)) > refetchAge || d.AdType === 'Historic') {
             return d.AdId;
         }
     });
@@ -150,7 +148,7 @@ function fetchPendingDetails() {
 
     var fetchers = [];
     while(pendingDetails.length) {
-        fetchers.push(fetchDetails(pendingDetails.splice(0, 30)));
+        fetchers.push(fetchDetails(pendingDetails.splice(0, 40)));
     }
     return Q.allSettled(fetchers);
 }
