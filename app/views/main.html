@@ -8,38 +8,30 @@
     <div class="map" map="tpreusse.hng3chlk" map-options="{{ mapState }}"></div>
     <pagination total-items="filteredObjects.length" max-size="10" rotate="false" page="currentPage" items-per-page="numPerPage"></pagination>
     <div class="row objects">
-      <flat ng-repeat="object in pagedFilteredObjects" class="object thumbnail">
-      </flat>
+      <flat ng-repeat="object in pagedFilteredObjects" class="object thumbnail"></flat>
     </div>
     <pagination total-items="filteredObjects.length" max-size="10" rotate="false" page="currentPage" items-per-page="numPerPage"></pagination>
 
-    <accordion close-others="false">
-      <accordion-group heading="✓ Selection" is-open="true">
-        <div class="row objects">
-          <flat ng-repeat="object in selection | filter: {selection:2,found:true}" class="object thumbnail"></flat>
-        </div>
-      </accordion-group>
-      <accordion-group heading="~ Maybe" is-open="true">
-        <div class="row objects">
-          <flat ng-repeat="object in selection | filter: {selection:1,found:true}" class="object thumbnail"></flat>
-        </div>
-      </accordion-group>
-      <accordion-group heading="✕ Nope">
-        <div class="row objects">
-          <flat ng-repeat="object in selection | filter: {selection:0,found:true}" class="object thumbnail"></flat>
-        </div>
-      </accordion-group>
-      <accordion-group heading="Gone" is-open="true">
-        <div class="row objects">
-          <flat ng-repeat="object in selection | filter: {found:false}" class="object thumbnail"></flat>
-        </div>
-      </accordion-group>
-    </accordion>
+    <div ng-if="goneObjects">
+      <h1>Gone</h1>
+      <p>Those are object you've selected but are no longer available</p>
+      <div class="row objects">
+        <flat ng-repeat="object in goneObjects | limitTo: 20" class="object thumbnail"></flat>
+      </div>
+    </div>
     <br><br>
   </div>
   <div class="col-md-3 sidebar">
     <h2 ng-show="filteredObjects !== undefined">{{ filteredObjects.length }} Objects<h2>
+
     <h3>Filters</h2>
+
+    <h4>Selection</h4>
+    <label ng-repeat="item in selectionFilter.list" class="filter-checkbox">
+      <input type="checkbox" ng-model="selectionFilter.check[item.name]">
+      {{ selectionFilterNames[item.name] }} ({{ item.count }})
+    </label>
+
     <h4>Price</h4>
 
     <div class="nvd3-container">

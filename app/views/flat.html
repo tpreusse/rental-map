@@ -24,6 +24,10 @@
       </span>
     </span>
   </p>
+  <div ng-if="false" real-if="object.selection !== undefined || object.comments">
+    <p ng-repeat="comment in objects.comments">{{ comment }}</p>
+    <p><input type="text" ui-keypress="{'enter':'comment($event, object.id)'}"></p>
+  </div>
   <div class="clearfix">
     <a class="btn btn-default" role="button" ng-class="{'btn-success':object.selection == 2}" ng-click="select(object, 2)">✓</a>
     <a class="btn btn-default" role="button" ng-class="{'btn-warning':object.selection == 1}"  ng-click="select(object, 1)">~</a>

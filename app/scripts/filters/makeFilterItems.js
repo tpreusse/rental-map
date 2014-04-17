@@ -28,25 +28,17 @@ filters.filter('makeFilterItems', function() {
             }
             filterItems.list = [];
 
-            var extractValueToCompare = function(item) {
-                if (angular.isObject(item) && angular.isString(filterOn)) {
-                    return item[filterOn];
-                } else {
-                    return item;
-                }
-            };
-
             angular.forEach(items, function(item) {
                 var duplicate = false;
 
+                var value = String(item[filterOn]);
                 for (var i = 0; i < filterItems.list.length; i++) {
-                    if (angular.equals(filterItems.list[i].name, extractValueToCompare(item))) {
+                    if (angular.equals(filterItems.list[i].name, value)) {
                         duplicate = filterItems.list[i];
                         break;
                     }
                 }
 
-                var value = item[filterOn];
                 if (value || !removeNulls) {
                     if (!angular.isDefined(filterItems.check[value])) {
                         filterItems.check[value] = !angular.isDefined(checked);

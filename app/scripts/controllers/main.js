@@ -30,6 +30,20 @@ angular.module('flatApp')
     localStorage.selection = angular.toJson(value);
   });
 
+  $scope.comment = function($event, id) {
+    $event.preventDefault();
+
+    var fav = _.find($scope.selection, function(f) {
+      return f.id === id;
+    });
+    if(!fav) {
+      $window.alert('can\'t comment on that');
+    }
+    var comment = $($event.target).val();
+    fav.comments = fav.comments || [];
+    fav.comments.push(comment);
+  };
+
   var dataRequest = $http.get('geojson.json').success(function(data){
     $scope.objects = data.features.map(function(o) {
       var simple = o.properties;
@@ -41,11 +55,12 @@ angular.module('flatApp')
         return f.id === simple.id;
       });
       if(fav) {
-        if(!angular.equals(simple, _.omit(fav, ['history', 'found', 'selection']))) {
+        if(!angular.equals(simple, _.omit(fav, ['history', 'found', 'selection', 'comments']))) {
           var old_fav = angular.copy(fav);
           fav = simple;
           fav.history = (old_fav.history || []).push(_.omit(old_fav, 'history'));
           fav.selection = old_fav.selection;
+          fav.comments = old_fav.comments;
         }
         else {
           simple = fav;
@@ -59,6 +74,14 @@ angular.module('flatApp')
       s.found = !!s.found;
     });
     $scope.filter = makeFilterItems($scope.objects, "rental_type", initialSearchQuery.type, true);
+    $scope.selectionFilter = makeFilterItems($scope.objects, "selection", initialSearchQuery.selection, false);
+    $scope.selectionFilterNames = {
+      "0": "Nope",
+      "1": "Maybe",
+      "2": "Yes",
+      "undefined": "TBD"
+    };
+    $scope.goneObjects = $filter('filter')($scope.selection, {found: false});
   });
   $scope.filterByRentalType = function(item) {
     return $scope.filter.check[item.rental_type];
@@ -72,7 +95,7 @@ angular.module('flatApp')
       });
     }
     objects = $filter('filter')(objects, function(item) {
-      return item.selection === undefined;
+      return $scope.selectionFilter.check[String(item.selection)];
     });
     objects = $filter('filter')(objects, $scope.filterByRentalType);
     objects = $filter('filter')(objects, function(item) {
@@ -89,6 +112,7 @@ angular.module('flatApp')
       return pass;
     });
     objects = $filter('orderBy')(objects, 'price');
+    objects = $filter('orderBy')(objects, 'selection', true);
     $scope.filteredObjects = objects;
   }
   // rounds coordinates before setting to state model
@@ -154,6 +178,17 @@ angular.module('flatApp')
       }
     });
     $location.search('type', checked.join(',')).replace();
+    filterObjects();
+  });
+  $scope.$watchCollection('selectionFilter.check', function() {
+    if(!$scope.selectionFilter) { return; }
+    var checked = [];
+    angular.forEach($scope.selectionFilter.check, function(value, key) {
+      if(value) {
+        checked.push(key);
+      }
+    });
+    $location.search('selection', checked.join(',')).replace();
     filterObjects();
   });
   $scope.$watch('mapState', function(value, old) {

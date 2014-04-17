@@ -7,6 +7,7 @@ angular.module('flatApp', [
   'ngSanitize',
   'ngRoute',
   'ui.bootstrap',
+  'ui.keypress',
   'nvd3ChartDirectives'
 ])
   .config(function ($routeProvider) {
