@@ -43,6 +43,11 @@ angular.module('flatApp')
     fav.comments = fav.comments || [];
     fav.comments.push(comment);
   };
+  $scope.saveSelection = function($event) {
+    $event.preventDefault();
+    var blob = new Blob([angular.toJson($scope.selection)], {type: "application/json;charset=utf-8"});
+    $window.saveAs(blob, "selection.json");
+  };
 
   var dataRequest = $http.get('geojson.json').success(function(data){
     $scope.objects = data.features.map(function(o) {
@@ -254,12 +259,12 @@ angular.module('flatApp')
   }
   $scope.xFunction = function(){
     return function(d){
-      return Math.sqrt(d.x);
+      return d.x;
     };
   };
   $scope.xAxisTickFormatFunction = function() {
     return function(d) {
-      return Math.round(d * d);
+      return Math.round(d);
     };
   };
   $scope.yFunction = function(){

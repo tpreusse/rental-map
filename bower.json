@@ -15,7 +15,8 @@
     "lodash": "~2.4.1",
     "angular-bootstrap": "~0.10.0",
     "angularjs-nvd3-directives": "~0.0.7",
-    "angular-ui-utils": "bower"
+    "angular-ui-utils": "bower",
+    "file-saver": "*"
   },
   "devDependencies": {
     "angular-mocks": "~1.2.0",

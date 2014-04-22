@@ -31,7 +31,10 @@
       <input type="checkbox" ng-model="selectionFilter.check[item.name]">
       {{ selectionFilterNames[item.name] }} ({{ item.count }})
     </label>
-
+    <p>
+      Your selection is saved in your local storage of your browser.
+      <a ng-click="saveSelection($event)" href="#save">Save selection to disk.</a>
+    </p>
     <h4>Price</h4>
 
     <div class="nvd3-container">
