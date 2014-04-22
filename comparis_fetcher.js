@@ -164,7 +164,10 @@ function generateGeoJson() {
             image = d.ImageUrl;
 
         if(image) {
-            image = "https://www.comparis.ch" + String(d.ImageUrl).replace(/&(w|h|rm)=\d+/g, '');
+            image = String(d.ImageUrl).replace(/&(w|h)=\d+/g, '');
+            if(!image.match(/^http/)) {
+                image = "https://www.comparis.ch" + image;
+            }
         }
 
         features.push({
