@@ -5,7 +5,6 @@ angular.module('flatApp')
   var makeFilterItems = $filter('makeFilterItems');
   var initialSearchQuery = angular.copy($location.search());
 
-  $scope.selection = angular.fromJson(localStorage.selection || '[]');
   $scope.select = function(object, selection) {
     object.selection = selection;
     if(object.found === undefined) {
@@ -17,17 +16,29 @@ angular.module('flatApp')
     if(!fav) {
       $scope.selection.push(object);
     }
-    localStorage.selection = angular.toJson($scope.selection);
-    filterObjects();
+    $scope.apply();
   };
   $scope.release = function(object) {
     _.remove($scope.selection, function(f) {
       return f.id === object.id;
     });
-    localStorage.selection = angular.toJson($scope.selection);
+    $scope.goneObjects = $filter('filter')($scope.selection, {found: false});
+    $scope.apply();
   };
-  $scope.$watchCollection('selection', function(value) {
+  $scope.$watchCollection('selection', function(value, old) {
+    if(!value && !old) {
+      // before selection is initiated
+      return;
+    }
     localStorage.selection = angular.toJson(value);
+
+    $scope.selectionFilter = makeFilterItems(
+      $scope.objects,
+      "selection",
+      $scope.selectionFilter ? $scope.selectionFilter.check : initialSearchQuery.selection,
+      false
+    );
+    filterObjects();
   });
 
   $scope.comment = function($event, id) {
@@ -45,8 +56,60 @@ angular.module('flatApp')
   };
   $scope.saveSelection = function($event) {
     $event.preventDefault();
-    var blob = new Blob([angular.toJson($scope.selection)], {type: "application/json;charset=utf-8"});
+    var blob = new Blob([angular.toJson($scope.selection, true)], {type: "application/json;charset=utf-8"});
     $window.saveAs(blob, "selection.json");
+  };
+  $scope.onFileSelect = function($files) {
+    var fileReader = new FileReader();
+    fileReader.onload = function(event) {
+      readSelection(event.target.result);
+      $scope.$apply();
+    };
+    for (var i = 0; i < $files.length; i++) {
+      var file = $files[i];
+      fileReader.readAsText(file);
+    }
+  };
+
+  var readSelection = function(string) {
+    $scope.selection = angular.fromJson(string || '[]');
+    angular.forEach($scope.selection, function(s) {
+      s.found = undefined;
+    });
+
+    $scope.objects = $scope.objects.map(function(o) {
+      var fav = _.find($scope.selection, function(f) {
+        return f.id === o.id;
+      });
+      if(fav) {
+        var ignoredKeys = ['history', 'found', 'selection', 'comments'];
+        if(!angular.equals(_.omit(o, ignoredKeys), _.omit(fav, ignoredKeys))) {
+          o.history = (fav.history || []);
+          o.history.push(_.omit(fav, 'history'));
+          o.selection = fav.selection;
+          o.comments = fav.comments;
+
+          _.remove($scope.selection, fav);
+          $scope.selection.push(o);
+        }
+        else {
+          o = fav;
+        }
+        o.found = true;
+      }
+      else {
+        o.found = undefined;
+        o.history = undefined;
+        o.selection = undefined;
+        o.comments = undefined;
+      }
+      return o;
+    });
+
+    angular.forEach($scope.selection, function(s) {
+      s.found = !!s.found;
+    });
+    $scope.goneObjects = $filter('filter')($scope.selection, {found: false});
   };
 
   var dataRequest = $http.get('geojson.json').success(function(data){
@@ -56,37 +119,16 @@ angular.module('flatApp')
       simple.lat = o.geometry.coordinates[1];
       simple.lng = o.geometry.coordinates[0];
 
-      var fav = _.find($scope.selection, function(f) {
-        return f.id === simple.id;
-      });
-      if(fav) {
-        if(!angular.equals(simple, _.omit(fav, ['history', 'found', 'selection', 'comments']))) {
-          var old_fav = angular.copy(fav);
-          fav = simple;
-          fav.history = (old_fav.history || []).push(_.omit(old_fav, 'history'));
-          fav.selection = old_fav.selection;
-          fav.comments = old_fav.comments;
-        }
-        else {
-          simple = fav;
-        }
-        fav.found = true;
-      }
-
       return simple;
     });
-    angular.forEach($scope.selection, function(s) {
-      s.found = !!s.found;
-    });
+    readSelection(localStorage.selection);
     $scope.filter = makeFilterItems($scope.objects, "rental_type", initialSearchQuery.type, true);
-    $scope.selectionFilter = makeFilterItems($scope.objects, "selection", initialSearchQuery.selection, false);
     $scope.selectionFilterNames = {
       "0": "Nope",
       "1": "Maybe",
       "2": "Yes",
       "undefined": "TBD"
     };
-    $scope.goneObjects = $filter('filter')($scope.selection, {found: false});
   });
   $scope.filterByRentalType = function(item) {
     return $scope.filter.check[item.rental_type];
@@ -99,9 +141,11 @@ angular.module('flatApp')
         return $scope.mapState.bounds.contains(new L.LatLng(o.lat, o.lng));
       });
     }
-    objects = $filter('filter')(objects, function(item) {
-      return $scope.selectionFilter.check[String(item.selection)];
-    });
+    if($scope.selectionFilter) {
+      objects = $filter('filter')(objects, function(item) {
+        return $scope.selectionFilter.check[String(item.selection)];
+      });
+    }
     objects = $filter('filter')(objects, $scope.filterByRentalType);
     objects = $filter('filter')(objects, function(item) {
       var pass = true;

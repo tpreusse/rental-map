@@ -8,7 +8,8 @@ angular.module('flatApp', [
   'ngRoute',
   'ui.bootstrap',
   'ui.keypress',
-  'nvd3ChartDirectives'
+  'nvd3ChartDirectives',
+  'angularFileUpload'
 ])
   .config(function ($routeProvider) {
     $routeProvider
