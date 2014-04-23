@@ -70,6 +70,16 @@ $icon-font-path: "/bower_components/sass-bootstrap/fonts/";
             height: 100%;
         }
 
+        .actions {
+            margin-top: -5px;
+            a {
+                margin-top: 5px;
+            }
+            .pull-right a {
+                margin-left: 5px;
+            }
+        }
+
         h3 {
             font-size: 1.3em;
             margin: 0 0 10px;

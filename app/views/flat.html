@@ -28,7 +28,7 @@
     <p ng-repeat="comment in objects.comments">{{ comment }}</p>
     <p><input type="text" ui-keypress="{'enter':'comment($event, object.id)'}"></p>
   </div>
-  <div class="clearfix">
+  <div class="clearfix actions">
     <div class="pull-right">
       <a ng-href="{{ object.href }}" class="btn btn-default" role="button" target="_blank">Details</a>
     </div>
@@ -38,7 +38,7 @@
       <a class="btn btn-default" role="button" ng-class="{'btn-danger':object.selection == 0}"  ng-click="select(object, 0)" tooltip="Nope">✕</a>
     </div>
     <div ng-if="object.selection !== undefined &amp;&amp; !object.found" class="pull-right">
-      <a class="btn btn-danger" role="button" ng-click="release(object)" style="margin-top:10px;">Release</a>
+      <a class="btn btn-danger" role="button" ng-click="release(object)">Release</a>
     </div>
   </div>
 </div>
