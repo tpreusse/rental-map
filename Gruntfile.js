@@ -266,6 +266,14 @@ module.exports = function (grunt) {
       }
     },
 
+    minjson: {
+      compile: {
+        files: {
+          '<%= yeoman.dist %>/geojson.json': '<%= yeoman.app %>/geojson.json'
+        }
+      }
+    },
+
     // Copies remaining files to places other tasks can use
     copy: {
       dist: {
@@ -277,7 +285,6 @@ module.exports = function (grunt) {
           src: [
             '*.{ico,png,txt}',
             '.htaccess',
-            'bower_components/**/*',
             'images/{,*/}*.{webp}',
             'fonts/*'
           ]
@@ -388,6 +395,7 @@ module.exports = function (grunt) {
     'concat',
     'ngmin',
     'copy:dist',
+    'minjson',
     'cdnify',
     'cssmin',
     'uglify',
