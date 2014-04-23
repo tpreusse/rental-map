@@ -29,14 +29,16 @@
     <p><input type="text" ui-keypress="{'enter':'comment($event, object.id)'}"></p>
   </div>
   <div class="clearfix">
+    <div class="pull-right">
+      <a ng-href="{{ object.href }}" class="btn btn-default" role="button" target="_blank">Details</a>
+    </div>
     <div class="btn-group">
       <a class="btn btn-default" role="button" ng-class="{'btn-success':object.selection == 2}" ng-click="select(object, 2)" tooltip="Yes">✓</a>
       <a class="btn btn-default" role="button" ng-class="{'btn-warning':object.selection == 1}"  ng-click="select(object, 1)" tooltip="Maybe">~</a>
       <a class="btn btn-default" role="button" ng-class="{'btn-danger':object.selection == 0}"  ng-click="select(object, 0)" tooltip="Nope">✕</a>
     </div>
-    <div class="pull-right">
-      <a ng-if="object.selection !== undefined &amp;&amp; !object.found" class="btn btn-danger" role="button" ng-click="release(object)">Release</a>
-      <a ng-href="{{ object.href }}" class="btn btn-default" role="button" target="_blank">Details</a>
+    <div ng-if="object.selection !== undefined &amp;&amp; !object.found" class="pull-right">
+      <a class="btn btn-danger" role="button" ng-click="release(object)" style="margin-top:10px;">Release</a>
     </div>
   </div>
 </div>
