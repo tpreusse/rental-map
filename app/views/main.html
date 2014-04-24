@@ -6,7 +6,10 @@
   <div class="container">
     <div class="row">
       <div class="col-md-12">
-        <h1>Flats in Zurich</h1>
+        <h1>
+          Rentals in Zürich
+          <small>powered by <a href="https://www.comparis.ch/">comparis.ch</a> data.</small>
+        </h1>
       </div>
     </div>
     <div class="row">
@@ -37,10 +40,12 @@
           Selection
           <a class="pull-right selection-save" href="#save" ng-file-drop-available="dropSupported=true" ng-show="dropSupported" ng-click="saveSelection($event)" popover="Your selection is saved in the local storage of your browser. By clicking you can explicitly save it to your disk and even share it. Later drop any selection.json anywhere onto the page to import it." popover-trigger="mouseenter" popover-placement="left" popover-append-to-body="true">⟳</a>
         </h4>
-        <label ng-repeat="item in selectionFilter.list" class="filter-checkbox">
-          <input type="checkbox" ng-model="selectionFilter.check[item.name]">
-          {{ selectionFilterNames[item.name] }} ({{ item.count }})
-        </label>
+        <p>
+          <label ng-repeat="item in selectionFilter.list" class="filter-checkbox">
+            <input type="checkbox" ng-model="selectionFilter.check[item.name]">
+            {{ selectionFilterNames[item.name] }} ({{ item.count }})
+          </label>
+        </p>
         <h4>Price</h4>
 
         <div class="nvd3-container">
@@ -82,11 +87,13 @@
         </label>
 
         <h4>Rental Type</h4>
-        <label ng-repeat="item in filter.list" class="filter-checkbox">
-          <input type="checkbox" ng-model="filter.check[item.name]">
-          <span class="color" ng-style="{backgroundColor:typeScale(item.name)}"></span>
-          {{ item.name }} ({{ item.count }})
-        </label>
+        <p>
+          <label ng-repeat="item in filter.list" class="filter-checkbox">
+            <input type="checkbox" ng-model="filter.check[item.name]">
+            <span class="color" ng-style="{backgroundColor:typeScale(item.name)}"></span>
+            {{ item.name }} ({{ item.count }})
+          </label>
+        </p>
       </div>
     </div>
   </div>
