@@ -156,6 +156,8 @@ function fetchPendingDetails() {
 function generateGeoJson() {
     var features = [];
 
+    var updateDate;
+
     details.filter(function(d) { return d.AdType === 'Actual'; }).forEach(function(d) {
         var m = _.find(ads, function(a) { return d.AdId === a.AdId; });
 
@@ -168,6 +170,11 @@ function generateGeoJson() {
             if(!image.match(/^http/)) {
                 image = "https://www.comparis.ch" + image;
             }
+        }
+
+        var featureUpdateDate = new Date(d.LastFetched);
+        if(!updateDate || updateDate < featureUpdateDate) {
+            updateDate = featureUpdateDate;
         }
 
         features.push({
@@ -197,6 +204,9 @@ function generateGeoJson() {
 
     fs.writeFileSync('app/geojson.json', JSON.stringify({
         "type": "FeatureCollection",
+        "properties": {
+            "update": updateDate.toJSON()
+        },
         "features": features
     }, null, 4), 'utf8');
 }

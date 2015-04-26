@@ -112,7 +112,9 @@ angular.module('flatApp')
     $scope.goneObjects = $filter('filter')($scope.selection, {found: false});
   };
 
+  var updateTimeFormat = d3.time.format('%B %e %Y, %-I&nbsp;%p');
   var dataRequest = $http.get('geojson.json').success(function(data){
+    $scope.updateDate = updateTimeFormat(new Date(data.properties.update));
     $scope.objects = data.features.map(function(o) {
       var simple = o.properties;
       simple.id = simple.source + simple.source_id;
@@ -327,7 +329,6 @@ angular.module('flatApp')
   //     return d3.time.format('%x')(new Date(d));  //uncomment for date format
   //   };
   // };
-
 
 
   // room

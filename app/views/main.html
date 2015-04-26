@@ -32,7 +32,9 @@
         <br><br>
       </div>
       <div class="col-md-3 sidebar">
-        <h2 ng-show="filteredObjects !== undefined">{{ filteredObjects.length }} Objects<h2>
+        <h2 ng-show="filteredObjects !== undefined">{{ filteredObjects.length }} Objects</h2>
+
+        <p>Last updated: <span ng-bind-html="updateDate"></span></p>
 
         <h3>Filters</h2>
 
