@@ -28,9 +28,9 @@ function get(options) {
 }
 
 var rk = 1,
-    clusters = require('./clusters.json'),
-    ads = require('./ads.json'),
-    details = require('./details.json');
+    clusters = require('./data/clusters.json'),
+    ads = require('./data/ads.json'),
+    details = require('./data/details.json');
 
 var refetchAge = new Date();
     refetchAge.setHours(refetchAge.getHours() - 6);
@@ -91,8 +91,8 @@ function fetchClusters() {
 
                 console.log('clusters', clusters.length);
                 console.log('ads', ads.length);
-                fs.writeFileSync('clusters.json', JSON.stringify(clusters, null, 4), 'utf8');
-                fs.writeFileSync('ads.json', JSON.stringify(ads, null, 4), 'utf8');
+                fs.writeFileSync('data/clusters.json', JSON.stringify(clusters, null, 4), 'utf8');
+                fs.writeFileSync('data/ads.json', JSON.stringify(ads, null, 4), 'utf8');
             });
         })
     ).then(function() {
@@ -126,7 +126,7 @@ function fetchDetails(ids) {
             }
         });
         console.log('details', details.length);
-        fs.writeFileSync('details.json', JSON.stringify(details, null, 4), 'utf8');
+        fs.writeFileSync('data/details.json', JSON.stringify(details, null, 4), 'utf8');
     });
 }
 
