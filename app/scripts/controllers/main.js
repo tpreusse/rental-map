@@ -5,7 +5,6 @@ angular.module('flatApp')
   var makeFilterItems = $filter('makeFilterItems');
   var initialSearchQuery = angular.copy($location.search());
   var defaultQuery = {
-    days: 30,
     type: 'Wohnung,Dachwohnung,Maisonette,Einzelzimmer,Attika,Loft,WG-Zimmer,Studio,Doppeleinfamilienhaus,Bauernhaus,Reihenhaus,Villa,Terrassenwohnung'
   };
   Object.keys(defaultQuery).forEach(function(key) {
@@ -144,6 +143,9 @@ angular.module('flatApp')
 
       return simple;
     });
+    if (initialSearchQuery.days === undefined && $scope.daysMax === undefined) {
+      $scope.daysMax = d3.min($scope.objects, function(d) { return d.days; }) + 30;
+    }
     readSelection(localStorage.selection);
     $scope.filter = makeFilterItems($scope.objects, "rental_type", initialSearchQuery.type, true);
     $scope.selectionFilterNames = {
