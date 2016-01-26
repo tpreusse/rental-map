@@ -196,7 +196,12 @@ function generateGeoJson() {
                 "city": d.City,
                 "street": street,
                 "floor": d.floor,
-                "create_date": new Date(d.CreateDate.replace('/Date(', '').replace(')/', '')).toJSON()
+                "create_date": new Date(
+                    +d.CreateDate
+                        .replace('/Date(', '')
+                        .replace(')/', '')
+                        .split('+')[0]
+                ).toJSON()
             }
         });
     });

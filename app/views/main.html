@@ -88,6 +88,24 @@
           Min: <input size="6" type="text" ng-model="roomMin" />
         </label>
 
+        <h4>Age in Days</h4>
+        <div class="nvd3-container">
+          <nvd3-stacked-area-chart
+            data="ageData"
+              id="ageChart"
+              showXAxis="true"
+              showYAxis="true"
+              yAxisTickFormat="roomYAxisTickFormatFunction()"
+              useInteractiveGuideline="true"
+              tooltips="true"
+              height="250"
+              style="stream">
+          </nvd3-stacked-area-chart>
+        </div>
+        <label>
+          Max: <input size="6" type="text" ng-model="daysMax" />
+        </label>
+
         <h4>Rental Type</h4>
         <p>
           <label ng-repeat="item in filter.list" class="filter-checkbox">

@@ -4,6 +4,15 @@ angular.module('flatApp')
 .controller('MainCtrl', function($scope, $http, $filter, $location, $window, localStorage) {
   var makeFilterItems = $filter('makeFilterItems');
   var initialSearchQuery = angular.copy($location.search());
+  var defaultQuery = {
+    days: 30,
+    type: 'Wohnung,Dachwohnung,Maisonette,Einzelzimmer,Attika,Loft,WG-Zimmer,Studio,Doppeleinfamilienhaus,Bauernhaus,Reihenhaus,Villa,Terrassenwohnung'
+  };
+  Object.keys(defaultQuery).forEach(function(key) {
+    if (initialSearchQuery[key] === undefined) {
+      initialSearchQuery[key] = defaultQuery[key];
+    }
+  });
 
   $scope.select = function(object, selection) {
     object.selection = selection;
@@ -115,11 +124,23 @@ angular.module('flatApp')
   var updateTimeFormat = d3.time.format('%B %e %Y, %-I&nbsp;%p');
   var dataRequest = $http.get('geojson.json').success(function(data){
     $scope.updateDate = updateTimeFormat(new Date(data.properties.update));
+    var time = (new Date()).getTime();
     $scope.objects = data.features.map(function(o) {
       var simple = o.properties;
       simple.id = simple.source + simple.source_id;
       simple.lat = o.geometry.coordinates[1];
       simple.lng = o.geometry.coordinates[0];
+      var create_date = new Date(o.properties.create_date);
+      var age = (time - create_date.getTime());
+      age /= 1000 * 60 * 60 * 24;
+      simple.days = age = Math.ceil(Math.abs(age));
+      if (age > 14) {
+        simple.age = Math.ceil(age / 7) + ' weeks';
+      } else if (age === 1) {
+        simple.age = 'one day';
+      } else {
+        simple.age = age + ' days';
+      }
 
       return simple;
     });
@@ -151,6 +172,9 @@ angular.module('flatApp')
     objects = $filter('filter')(objects, $scope.filterByRentalType);
     objects = $filter('filter')(objects, function(item) {
       var pass = true;
+      if(item.days && item.days > $scope.daysMax) {
+        pass = false;
+      }
       if(item.rooms && $scope.roomMin && item.rooms < $scope.roomMin) {
         pass = false;
       }
@@ -199,6 +223,7 @@ angular.module('flatApp')
       $scope.roomData = [];
       var minRoom = d3.min($scope.filteredObjects, function(d) { return d.rooms; }),
           maxRoom = d3.max($scope.filteredObjects, function(d) { return d.rooms; });
+      var maxDays = d3.max($scope.filteredObjects, function(d) { return d.days; });
 
       angular.forEach($scope.filter.list, function(item) {
         var objects = [];
@@ -207,6 +232,7 @@ angular.module('flatApp')
         }
         generatePriceData(item.name, objects);
         generateRoomData(item.name, objects, minRoom, maxRoom);
+        generateAgeData(item.name, objects, maxDays);
         angular.element($window).trigger('resize');
       });
     }
@@ -256,13 +282,15 @@ angular.module('flatApp')
   $scope.priceMin = initialSearchQuery.min;
   $scope.priceMax = initialSearchQuery.max;
   $scope.roomMin = initialSearchQuery.room;
-  $scope.$watch('priceMin + priceMax + roomMin', function(value, old) {
+  $scope.daysMax = initialSearchQuery.days;
+  $scope.$watch('priceMin + priceMax + roomMin + daysMax', function(value, old) {
     if(value === old) { return; }
 
     $location
       .search('min', $scope.priceMin)
       .search('max', $scope.priceMax)
       .search('room', $scope.roomMin)
+      .search('days', $scope.daysMax)
       .replace();
 
     filterObjects();
@@ -368,5 +396,37 @@ angular.module('flatApp')
       return Math.round(d);
     };
   };
+
+  // age
+  $scope.ageData = [];
+  function generateAgeData(key, objects, maxDays) {
+    var data = $scope.ageData.filter(function(d) { return d.key === key; })[0];
+    if(angular.equals(objects, [])) {
+      if(data) {
+        _.remove($scope.ageData, function(d) { return d.key === key; });
+      }
+      return;
+    }
+    var counters = {};
+    objects.forEach(function(objects) {
+      if(!objects.days) { return; }
+      counters[objects.days] = (counters[objects.days] || 0) + 1;
+    });
+    var values = [], i;
+    for(i = 0; i <= maxDays; i += 1) {
+      values.push([i, counters[String(i)] || 0]);
+    }
+
+    if(data) {
+      data.values = values;
+    }
+    else {
+      $scope.ageData.push({
+        key: key,
+        color: $scope.typeScale(key),
+        values: values
+      });
+    }
+  }
 
 });

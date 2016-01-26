@@ -1,7 +1,7 @@
 <img ng-src="{{ object.image }}" ng-if="object.image">
 <div class="caption">
   <p>
-    <span ng-style="{color:typeScale(object.rental_type)}">{{ object.rental_type }}</span>
+    <span ng-style="{color:typeScale(object.rental_type)}">{{ object.rental_type }}</span> – <em>{{ object.age }} old</em>
   </p>
   <h3>{{ object.street }}</h3>
   <p>
