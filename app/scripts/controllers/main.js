@@ -391,7 +391,7 @@ angular.module('flatApp')
     }
   }
 
-  $scope.roomYAxisTickFormatFunction = function() {
+  $scope.roundYAxisTickFormatFunction = function() {
     return function(d) {
       return Math.round(d);
     };
