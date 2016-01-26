@@ -259,13 +259,6 @@ module.exports = function (grunt) {
       }
     },
 
-    // Replace Google CDN references
-    cdnify: {
-      dist: {
-        html: ['<%= yeoman.dist %>/*.html']
-      }
-    },
-
     minjson: {
       compile: {
         files: {
@@ -396,7 +389,6 @@ module.exports = function (grunt) {
     'ngmin',
     'copy:dist',
     'minjson',
-    'cdnify',
     'cssmin',
     'uglify',
     'rev',
