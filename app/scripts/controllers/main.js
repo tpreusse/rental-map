@@ -225,6 +225,8 @@ angular.module('flatApp')
       $scope.roomData = [];
       var minRoom = d3.min($scope.filteredObjects, function(d) { return d.rooms; }),
           maxRoom = d3.max($scope.filteredObjects, function(d) { return d.rooms; });
+      
+      $scope.ageData = [];
       var maxDays = d3.max($scope.filteredObjects, function(d) { return d.days; });
 
       angular.forEach($scope.filter.list, function(item) {
